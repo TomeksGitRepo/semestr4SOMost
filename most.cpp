@@ -131,6 +131,7 @@ void Samochod::przejedz_przez_most() {
 			break;
 		}
 	}
+	this->most_pointer->set_nr_samochodu(0); //0 means most is empty
 	this->obecne_miasto->zwieksz_ilosc(this->numer);
 }
 
@@ -194,7 +195,11 @@ int main() {
 	testowy.przejedz_przez_most();
 
 	//testowy.przejadzka_po_miescie();
-	//sleep(1);
+	sleep(10);
 	wyswietl_stan(pointer_most, miasta);
+	testowy.przejedz_przez_most();
+	wyswietl_stan(pointer_most, miasta);
+
+	
 	return 0;
 }
