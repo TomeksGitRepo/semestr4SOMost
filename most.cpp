@@ -142,7 +142,10 @@ void Samochod::przejedz_przez_most() {
 
 void Miasto::dodaj_samochod_do_kolejki(int do_dodania) {
 	this->mtx.lock();
+	std::list<int>::iterator iter = std::find (this->kolejka_samochodow.begin(), this->kolejka_samochodow.end(), do_dodania);	
+	if (iter == this->kolejka_samochodow.end()) {
 	this->kolejka_samochodow.push_back(do_dodania);
+	}
 	this->mtx.unlock();
 }
 
