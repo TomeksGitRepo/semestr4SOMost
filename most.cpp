@@ -109,6 +109,9 @@ void Samochod::pojedz_do_kolejki() {
 }
 
 void Samochod::przejadzka_po_miescie() {
+	if (this->numer == this->obecne_miasto->kolejka_samochodow.front()) { //Jeżeli to jest następny samochód do przejechania przez most nie rezygnuje z kolejki
+		return;
+	}
 	//TODO make this remove element thread save
 	this->obecne_miasto->kolejka_samochodow.remove(this->numer);
 	this->obecne_miasto->dodaj_do_przejazdzki(this->numer);
