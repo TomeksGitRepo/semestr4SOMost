@@ -71,6 +71,7 @@ void Most::set_z_miasta(Miasto* miasto_start) {
 
 class Samochod {
 	public:
+	Samochod(int numer, Most* most_pointer, Miasto* obecne_miasto, vector<Miasto*> &miasta);
 	int numer;
 	void przejedz_przez_most();
 	void przejadzka_po_miescie();
@@ -78,7 +79,16 @@ class Samochod {
 	void run();
 	Most* most_pointer;
 	Miasto* obecne_miasto;
+	vector<Miasto*> miasta_copie;
 };
+
+Samochod::Samochod(int numer, Most* most_pointer, Miasto* obecne_miasto, vector<Miasto*> &miasta) {
+	this->numer = numer;
+	this->most_pointer = most_pointer;
+	this->obecne_miasto = obecne_miasto;
+	this->obecne_miasto->zwieksz_ilosc(this->numer);
+	this->miasta_copie = miasta;
+}
 
 void Samochod::run() {
 	int losowa_licza = rand() % 2;
@@ -112,7 +122,16 @@ void Samochod::przejedz_przez_most() {
 	this->most_pointer->set_z_miasta(this->obecne_miasto);
 	sleep(3);
 	this->obecne_miasto->zmniejsz_ilosc(this->numer);
+	
 	//TODO finish this
+	for(std::vector<Miasto*>::iterator it = this->miasta_copie.begin(); it != this->miasta_copie.end(); ++it) {
+		cout << "Compering names" << (*it)->nazwa << " with " << this->obecne_miasto->nazwa << endl;
+		if ((*it)->nazwa != this->obecne_miasto->nazwa) {
+			this->obecne_miasto = *it;
+			break;
+		}
+	}
+	this->obecne_miasto->zwieksz_ilosc(this->numer);
 }
 
 
@@ -148,9 +167,10 @@ int Miasto::podaj_ilosc_samochodow() {
 
 void wyswietl_stan(Most* most, vector<Miasto*> &miasta) {
 
-	cout << "Status mostu" << most->nr_samochodu << ";" << endl;
+	cout << "Status mostu: " << most->nr_samochodu << ";" << endl;
 	for(std::vector<Miasto*>::iterator it = miasta.begin(); it != miasta.end(); ++it) {
 	cout << (*it)->nazwa << endl;
+	cout << (*it)->podaj_ilosc_samochodow() << endl;
 	}
 }
 
@@ -164,13 +184,17 @@ int main() {
 	miasta.push_back(new Miasto("A"));
 	miasta.push_back(new Miasto("B"));
 
-
-		
-
 	Most* pointer_most = &most;
 
 	wyswietl_stan(pointer_most, miasta);
-	
+	Samochod testowy(5, pointer_most, miasta[1], miasta);
+	testowy.przejadzka_po_miescie();
+	wyswietl_stan(pointer_most, miasta);
+	testowy.pojedz_do_kolejki();
+	testowy.przejedz_przez_most();
 
+	//testowy.przejadzka_po_miescie();
+	//sleep(1);
+	wyswietl_stan(pointer_most, miasta);
 	return 0;
 }
