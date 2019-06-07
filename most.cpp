@@ -1,4 +1,3 @@
-#include <string>
 #include <iostream>
 #include <pthread.h>
 #include <list>
@@ -7,12 +6,14 @@
 #include <unistd.h>
 #include <algorithm>
 #include <cstdlib>
+#include <string>
 
 using namespace std;
 
 
 class Miasto {
 	public:
+	Miasto(string nazwa): nazwa{"None"}{this->nazwa = nazwa;};
 	string nazwa;
 	list<int> kolejka_samochodow;
 	list<int> przejazdzka_po_miescie;
@@ -71,7 +72,6 @@ void Most::set_z_miasta(Miasto* miasto_start) {
 class Samochod {
 	public:
 	int numer;
-	Miasto* miasto;
 	void przejedz_przez_most();
 	void przejadzka_po_miescie();
 	void pojedz_do_kolejki();
@@ -109,7 +109,7 @@ void Samochod::przejadzka_po_miescie() {
 
 void Samochod::przejedz_przez_most() {
 	this->most_pointer->set_nr_samochodu(this->numer);
-	this->most_pointer->set_z_miasta(this->miasto);
+	this->most_pointer->set_z_miasta(this->obecne_miasto);
 	sleep(3);
 	this->obecne_miasto->zmniejsz_ilosc(this->numer);
 	//TODO finish this
@@ -146,9 +146,31 @@ int Miasto::podaj_ilosc_samochodow() {
 	return this->samochody_w_miescie.size();
 }
 
-int main() {
+void wyswietl_stan(Most* most, vector<Miasto*> &miasta) {
 
-	pthread_t tid[10];
+	cout << "Status mostu" << most->nr_samochodu << ";" << endl;
+	for(std::vector<Miasto*>::iterator it = miasta.begin(); it != miasta.end(); ++it) {
+	cout << (*it)->nazwa << endl;
+	}
+}
+
+int main() {
+	Most most;
+	vector<Miasto*> miasta;
+	string A = "A";
+	string B = "B";
+	
+	//Creation of miasta vector
+	miasta.push_back(new Miasto("A"));
+	miasta.push_back(new Miasto("B"));
+
+
+		
+
+	Most* pointer_most = &most;
+
+	wyswietl_stan(pointer_most, miasta);
+	
 
 	return 0;
 }
