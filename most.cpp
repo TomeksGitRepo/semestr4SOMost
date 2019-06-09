@@ -204,6 +204,7 @@ void Miasto::zwieksz_ilosc(int nr_samochodu) {
 
 void Miasto::zmniejsz_ilosc(int nr_samochodu) {
 	this->mtx.lock();
+	this->kolejka_samochodow.remove(nr_samochodu);
 	this->samochody_w_miescie.erase(std::remove(this->samochody_w_miescie.begin(), this->samochody_w_miescie.end(), nr_samochodu), this->samochody_w_miescie.end());
 	this->mtx.unlock();
 }
@@ -217,9 +218,9 @@ void wyswietl_stan(Most* most, vector<Miasto*> &miasta) {
 
 	cout << "Status mostu: " << most->nr_samochodu << ";" << endl;
 	for(std::vector<Miasto*>::iterator it = miasta.begin(); it != miasta.end(); ++it) {
-	cout << (*it)->nazwa << endl;
-	cout << (*it)->podaj_ilosc_samochodow() << endl;
+	cout << (*it)->nazwa << "<< " << (*it)->samochody_w_miescie.size() << "Kolejka samochodow: " << (*it)->kolejka_samochodow.size() << endl ;
 	}
+
 }
 
 int main() {
@@ -235,14 +236,26 @@ int main() {
 
 	Most* pointer_most = &most;
 	
-	Samochod testowy(5, pointer_most, miasta[1], miasta);
+	Samochod testowy1(5, pointer_most, miasta[1], miasta);
+	Samochod testowy2(6, pointer_most, miasta[1], miasta);
+	Samochod testowy3(7, pointer_most, miasta[1], miasta);
+
 	vector<Samochod*> samochody;
-	samochody.push_back(&testowy);
-	testowy.StartInternalThread();
+	samochody.push_back(&testowy1);
+	samochody.push_back(&testowy2);
+	samochody.push_back(&testowy3);
+	testowy1.StartInternalThread();
+	testowy2.StartInternalThread();
+	testowy3.StartInternalThread();
+
+
 	
 
-	while(1)
+	while(1) {
+		sleep(1);
 		wyswietl_stan(pointer_most, miasta);
+	}
+		
 
 	
 	return 0;
