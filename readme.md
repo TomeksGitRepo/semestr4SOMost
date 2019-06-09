@@ -3,7 +3,7 @@ g++ -pthread most.cpp
 
 
 To run type: <br />
-./a.out <strong>Ilość samochodów</strong> <br />
+./a.out <strong>"Ilość samochodów"</strong> <br />
 
 
 
