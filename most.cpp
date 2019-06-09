@@ -223,30 +223,44 @@ void wyswietl_stan(Most* most, vector<Miasto*> &miasta) {
 
 }
 
-int main() {
+int main(int argc, char** argv) {
 	vector<Miasto*> miasta;	
 	
 	Most most(miasta);
 	string A = "A";
 	string B = "B";
-	
+
+	cout << "Argument passed to program ->>" << argv[1] << endl;
 	//Creation of miasta vector
 	miasta.push_back(new Miasto("A"));
 	miasta.push_back(new Miasto("B"));
 
 	Most* pointer_most = &most;
-	
-	Samochod testowy1(5, pointer_most, miasta[1], miasta);
-	Samochod testowy2(6, pointer_most, miasta[1], miasta);
-	Samochod testowy3(7, pointer_most, miasta[1], miasta);
-
 	vector<Samochod*> samochody;
-	samochody.push_back(&testowy1);
-	samochody.push_back(&testowy2);
-	samochody.push_back(&testowy3);
-	testowy1.StartInternalThread();
-	testowy2.StartInternalThread();
-	testowy3.StartInternalThread();
+	
+	int argument_number;
+	sscanf(argv[1], "%i", &argument_number);
+	cout << "argument_number" << argument_number << endl;
+	samochody.reserve(argument_number);
+	for(int i=1; i<= argument_number; i++) {
+		int losowa_liczba = rand() % 2;
+		samochody.push_back(new Samochod(i, pointer_most, miasta[losowa_liczba], miasta));
+	}
+	
+	for(std::vector<Samochod*>::iterator it = samochody.begin(); it != samochody.end(); ++it) {
+		(*it)->StartInternalThread();
+	}	
+
+//	Samochod testowy1(5, pointer_most, miasta[1], miasta);
+//	Samochod testowy2(6, pointer_most, miasta[1], miasta);
+//	Samochod testowy3(7, pointer_most, miasta[1], miasta);
+//
+//		samochody.push_back(&testowy1);
+//	samochody.push_back(&testowy2);
+//	samochody.push_back(&testowy3);
+//	testowy1.StartInternalThread();
+//	testowy2.StartInternalThread();
+//	testowy3.StartInternalThread();
 
 
 	
