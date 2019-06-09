@@ -10,6 +10,27 @@
 
 using namespace std;
 
+class ThreadClass {
+	public:
+		ThreadClass() {}
+		virtual ~ThreadClass() {}
+		bool StartInternalThread() {
+			return (pthread_create(&_thread, NULL, InternalThreadEntryFunc, this) == 0);
+		}
+
+		void WaitForInternalThreadToExit() {
+			(void) pthread_join(_thread, NULL);
+		}
+
+	protected:
+		virtual void InternalThreadEntry() = 0;
+
+	private:
+		static void* InternalThreadEntryFunc(void* This) {((ThreadClass*)This)->InternalThreadEntry(); return NULL; }
+		pthread_t _thread;
+};
+
+
 
 class Miasto {
 	public:
@@ -36,15 +57,25 @@ class Miasto {
 
 class Most {
 	public:
+	Most(vector<Miasto*> &miasta);
 	int nr_samochodu = 0; //0 means most is empty
 	Miasto* obecne_miasto;
+	vector<Miasto*> miasta_copie;
 	void set_nr_samochodu(int nr_samochodu);
 	int get_nr_przejezdzajacego();
 	void set_z_miasta(Miasto* miasto_start);
 	void zaimij_most();
+
 	private:
 	mutex mtx;
 };
+
+Most::Most(vector<Miasto*> &miasta) {
+	this->miasta_copie = miasta;
+}
+
+		
+
 
 void Most::zaimij_most() {
 	mtx.lock();
@@ -69,7 +100,7 @@ void Most::set_z_miasta(Miasto* miasto_start) {
 	mtx.unlock();
 }
 
-class Samochod {
+class Samochod : public ThreadClass {
 	public:
 	Samochod(int numer, Most* most_pointer, Miasto* obecne_miasto, vector<Miasto*> &miasta);
 	int numer;
@@ -77,6 +108,7 @@ class Samochod {
 	void przejadzka_po_miescie();
 	void pojedz_do_kolejki();
 	void run();
+	void InternalThreadEntry();
 	Most* most_pointer;
 	Miasto* obecne_miasto;
 	vector<Miasto*> miasta_copie;
@@ -91,17 +123,26 @@ Samochod::Samochod(int numer, Most* most_pointer, Miasto* obecne_miasto, vector<
 }
 
 void Samochod::run() {
-	int losowa_licza = rand() % 2;
 	
 	while(1) {
+		//TODO add check if can take bridge and if can run thru
+		if(this->numer == this->obecne_miasto->kolejka_samochodow.front()) {
+			this->przejedz_przez_most();
+		}
+	int losowa_licza = rand() % 2;
 	if (losowa_licza == 0) {
 		this->przejadzka_po_miescie();
 	} else {
 		this-> pojedz_do_kolejki();
 	}
-	sleep(30);
+	sleep(10);
 	}
+	
 
+}
+
+void Samochod::InternalThreadEntry() {
+	this->run();
 }
 
 void Samochod::pojedz_do_kolejki() {
@@ -182,8 +223,9 @@ void wyswietl_stan(Most* most, vector<Miasto*> &miasta) {
 }
 
 int main() {
-	Most most;
-	vector<Miasto*> miasta;
+	vector<Miasto*> miasta;	
+	
+	Most most(miasta);
 	string A = "A";
 	string B = "B";
 	
@@ -192,19 +234,15 @@ int main() {
 	miasta.push_back(new Miasto("B"));
 
 	Most* pointer_most = &most;
-
-	wyswietl_stan(pointer_most, miasta);
+	
 	Samochod testowy(5, pointer_most, miasta[1], miasta);
-	testowy.przejadzka_po_miescie();
-	wyswietl_stan(pointer_most, miasta);
-	testowy.pojedz_do_kolejki();
-	testowy.przejedz_przez_most();
+	vector<Samochod*> samochody;
+	samochody.push_back(&testowy);
+	testowy.StartInternalThread();
+	
 
-	//testowy.przejadzka_po_miescie();
-	sleep(10);
-	wyswietl_stan(pointer_most, miasta);
-	testowy.przejedz_przez_most();
-	wyswietl_stan(pointer_most, miasta);
+	while(1)
+		wyswietl_stan(pointer_most, miasta);
 
 	
 	return 0;
